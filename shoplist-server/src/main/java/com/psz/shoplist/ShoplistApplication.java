@@ -8,15 +8,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-import com.psz.shoplist.model.GroceryItem;
-import com.psz.shoplist.repository.ItemRepository;
+import com.psz.shoplist.model.document.GroceryItemDocument;
+import com.psz.shoplist.repository.GroceryItemRepository;
 
 @SpringBootApplication
 @EnableMongoRepositories
 public class ShoplistApplication implements CommandLineRunner  {
 
 	@Autowired
-    ItemRepository groceryItemRepo;
+    GroceryItemRepository groceryItemRepo;
 	
 	public static void main(String[] args) {
 		SpringApplication.run(ShoplistApplication.class, args);
@@ -25,11 +25,11 @@ public class ShoplistApplication implements CommandLineRunner  {
 	//CREATE
     void createGroceryItems() {
         System.out.println("Data creation started...");
-        groceryItemRepo.save(new GroceryItem("Whole Wheat Biscuit", "Whole Wheat Biscuit", 5, "snacks"));
-        groceryItemRepo.save(new GroceryItem("Kodo Millet", "XYZ Kodo Millet healthy", 2, "millets"));
-        groceryItemRepo.save(new GroceryItem("Dried Red Chilli", "Dried Whole Red Chilli", 2, "spices"));
-        groceryItemRepo.save(new GroceryItem("Pearl Millet", "Healthy Pearl Millet", 1, "millets"));
-        groceryItemRepo.save(new GroceryItem("Cheese Crackers", "Bonny Cheese Crackers Plain", 6, "snacks"));
+        groceryItemRepo.save(new GroceryItemDocument("Whole Wheat Biscuit", "Whole Wheat Biscuit", 5, "snacks"));
+        groceryItemRepo.save(new GroceryItemDocument("Kodo Millet", "XYZ Kodo Millet healthy", 2, "millets"));
+        groceryItemRepo.save(new GroceryItemDocument("Dried Red Chilli", "Dried Whole Red Chilli", 2, "spices"));
+        groceryItemRepo.save(new GroceryItemDocument("Pearl Millet", "Healthy Pearl Millet", 1, "millets"));
+        groceryItemRepo.save(new GroceryItemDocument("Cheese Crackers", "Bonny Cheese Crackers Plain", 6, "snacks"));
         System.out.println("Data creation complete...");
     }
 
@@ -89,14 +89,14 @@ private void deleteAllGroceryItems() {
 	// 2. Get item by name
 	public void getGroceryItemByName(String name) {
 		System.out.println("Getting item by name: " + name);
-		GroceryItem item = groceryItemRepo.findItemByName(name);
+		GroceryItemDocument item = groceryItemRepo.findItemByName(name);
 		System.out.println(getItemDetails(item));
 	}
 	
 	// 3. Get name and quantity of a all items of a particular category
 	public void getItemsByCategory(String category) {
 		System.out.println("Getting items for the category " + category);
-		List<GroceryItem> list = groceryItemRepo.findAll(category);
+		List<GroceryItemDocument> list = groceryItemRepo.findByCategory(category);
 		
 		list.forEach(item -> System.out.println("Name: " + item.getName() + ", Quantity: " + item.getQuantity()));
 	}
@@ -109,7 +109,7 @@ private void deleteAllGroceryItems() {
 
 	 // Print details in readable form
      
-     public String getItemDetails(GroceryItem item) {
+     public String getItemDetails(GroceryItemDocument item) {
 
 		System.out.println(
 		"Item Name: " + item.getName() + 
@@ -126,7 +126,7 @@ private void deleteAllGroceryItems() {
 		String newCategory = "munchies";
 		
 		// Find all the items with the category snacks
-		List<GroceryItem> list = groceryItemRepo.findAll(category);
+		List<GroceryItemDocument> list = groceryItemRepo.findByCategory(category);
 		
 		list.forEach(item -> {
 			// Update the category in each document
@@ -134,7 +134,7 @@ private void deleteAllGroceryItems() {
 		});
 		
 		// Save all the items in database
-		List<GroceryItem> itemsUpdated = groceryItemRepo.saveAll(list);
+		List<GroceryItemDocument> itemsUpdated = groceryItemRepo.saveAll(list);
 		
 		if(itemsUpdated != null)
 			System.out.println("Successfully updated " + itemsUpdated.size() + " items.");         
