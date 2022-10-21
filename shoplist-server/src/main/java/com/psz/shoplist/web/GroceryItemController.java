@@ -12,6 +12,8 @@ import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +32,7 @@ import com.psz.shoplist.web.assembler.GroceryItemModelAssembler;
 @RestController
 @RequestMapping("/api/v1/groceryItem")
 @EnableHypermediaSupport(type = HypermediaType.HAL)
+@EnableMethodSecurity
 public class GroceryItemController {
     
     @Autowired
@@ -39,6 +42,7 @@ public class GroceryItemController {
     GroceryItemModelAssembler groceryItemModelAssembler;
 
     @GetMapping
+    @PreAuthorize("permitAll")
     public HttpEntity<PagedModel<EntityModel<GroceryItemModel>>> findAll(
         @PageableDefault(size = 2) Pageable pageable, 
         PagedResourcesAssembler<GroceryItemModel> assembler ) {
@@ -51,12 +55,14 @@ public class GroceryItemController {
     }
 
     @GetMapping(value = "/{id}")
+    @PreAuthorize("permitAll")
     public HttpEntity<GroceryItemModel> findById(@PathVariable("id") String id) {
         GroceryItemDocument groceryItem =  RestPreconditions.checkFound(groceryItemRepo.findById(id));
         return new ResponseEntity<>(groceryItemModelAssembler.toModel(groceryItem), HttpStatus.OK);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public HttpEntity<GroceryItemModel> create(@RequestBody GroceryItemDocument resource) {
         RestPreconditions.checkNotNull(resource);
         GroceryItemDocument groceryItem = groceryItemRepo.save(resource);
@@ -64,6 +70,7 @@ public class GroceryItemController {
     }    
 
     @PutMapping(value = "/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public HttpEntity<GroceryItemModel> update(@PathVariable( "id" ) Long id, @RequestBody GroceryItemDocument resource) {
         RestPreconditions.checkNotNull(resource);
         RestPreconditions.checkNotNull(groceryItemRepo.findById(resource.getId()));
@@ -73,6 +80,7 @@ public class GroceryItemController {
 
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable("id") String id) {
         groceryItemRepo.deleteById(id);
     }    

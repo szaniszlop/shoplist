@@ -31,6 +31,7 @@ public class CustomWebSecurityConfigurerAdapter  {
 		InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
 		manager.createUser(users.username("user").password("password").roles("USER").build());
 		manager.createUser(users.username("admin").password("password").roles("USER","ADMIN").build());
+		manager.createUser(users.username("szaniszlop").password("password").roles("USER").build());
 		return manager;
 	}
 
@@ -39,12 +40,12 @@ public class CustomWebSecurityConfigurerAdapter  {
 		http
 			.antMatcher("/api/**")                                   
 			.authorizeHttpRequests(authorize -> authorize
-				.anyRequest().hasRole("ADMIN")
+				.anyRequest().hasAnyRole("ADMIN", "USER")
 			)
 			.httpBasic()
             .authenticationEntryPoint(authenticationEntryPoint);
         http.csrf().disable();
-        http.addFilterBefore(new CustomFilter(),
+        http.addFilterAfter(new CustomFilter(),
             BasicAuthenticationFilter.class);            
 		return http.build();
 	}
